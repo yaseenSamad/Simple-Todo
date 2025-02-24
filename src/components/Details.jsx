@@ -1,4 +1,4 @@
-    import { useState } from 'react';
+    import { useState,useEffect } from 'react';
     import { FaTrash } from 'react-icons/fa';
     
     const initialTodoData = [
@@ -19,11 +19,19 @@
         todoText: "Finish project",
         isCompleted: true,
         createdAt: "2023-07-15T12:30:00Z"
-      }
+      },
     ];
     
-    export default function Details() {
+    export default function Details({addTodo}) {
       const [todoData, setTodoData] = useState(initialTodoData);
+      const [filterValue, setfilterValue] = useState('All');
+
+      useEffect(()=>{
+        if(addTodo){
+            console.log(addTodo);
+            
+        }
+      },[addTodo])
     
       const updateIsCompleted = (todoId) => {
         setTodoData((prevTodos) =>
@@ -33,10 +41,28 @@
         );
       };
 
+    const deleteTodo = (todo) => {
+        setTodoData((prevTodos) =>
+            prevTodos.filter((item) =>item.todoId !== todo.todoId)
+          );
+    }
+
+    const filterTodo = (event) => {
+        console.log(event);
+        setfilterValue(event);
+        
+    }
+
+    const filteredTodos = todoData.filter((item) => {
+        if (filterValue === "Completed") return item.isCompleted;
+        if (filterValue === "Pending") return !item.isCompleted;
+        return true;
+      });
+
   return (
     <div className="details-block">
       <div className="task-filter">
-        <select name="filter" id="filter">
+        <select value={filterValue} onChange={e => filterTodo(e.target.value)}  name="filter" id="filter">
           <option value="All">All</option>
           <option value="Completed">Completed</option>
           <option value="Pending">Pending</option>
@@ -44,7 +70,7 @@
       </div>
       <div className="task-block">  
         <div className="task-box">
-              {todoData.map((data) => (
+        {filteredTodos.map((data) => (
           <div key={data.todoId} className="task-box-header">
             <span className='todo-text' style={{ flex: 8 }}>
               {data.todoText}
@@ -63,7 +89,7 @@
               </div>
             </span>
             <span style={{ flex: 1, textAlign:"center" }}>
-                <button className='delete-btn' >
+                <button onClick={()=> deleteTodo(data)} className='delete-btn' >
                     <FaTrash className="trash-icon" />
                 </button>
             </span>
