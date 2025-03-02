@@ -1,6 +1,6 @@
     import { useState,useEffect } from 'react';
     import { FaTrash } from 'react-icons/fa';
-    import { getTodoResponse,deleteTodoResponse,patchTodoResponse } from '../service';
+    import { getTodoResponse,deleteTodoResponse,patchTodoResponse,postTodoResponse } from '../service';
     
     // const initialTodoData = [
     //   {
@@ -33,6 +33,16 @@
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, []);
 
+      useEffect(() => {
+        console.log('addtodo changed',addTodo);
+        if(addTodo){  
+          addTodoData({todoText: addTodo}).then(()=>{
+            todoSet();
+          }).catch((error)=>console.log('Error while adding data',error))
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [addTodo]);
+
       async function fetchTodoData() {
         try {
           const data = await getTodoResponse()
@@ -62,6 +72,17 @@
           return data.data;
         } catch (error) {
           console.log("Error update data:", error);
+          return false;
+        }
+      }
+
+      async function addTodoData(body) {
+        try {
+          const data = await postTodoResponse(body)
+          console.log("added Data:", data);
+          return data.data;
+        } catch (error) {
+          console.log("Error adding data:", error);
           return false;
         }
       }

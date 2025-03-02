@@ -50,7 +50,6 @@ exports.deleteTodoDetails = async (req, res) => {
 
   exports.addTodoDetail = async (req, res) => {
     try {
-      console.log('here');
       const {todoText,isCompleted} = req.body
       console.log("Received data:", req.body);
 
