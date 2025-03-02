@@ -1,6 +1,6 @@
     import { useState,useEffect } from 'react';
     import { FaTrash } from 'react-icons/fa';
-    import { getTodoResponse,deleteTodoResponse } from '../service';
+    import { getTodoResponse,deleteTodoResponse,patchTodoResponse } from '../service';
     
     // const initialTodoData = [
     //   {
@@ -54,22 +54,45 @@
           return false;
         }
       }
+
+      async function updateTodoData(id,body) {
+        try {
+          const data = await patchTodoResponse(id,body)
+          console.log("update Data:", data);
+          return data.data;
+        } catch (error) {
+          console.log("Error update data:", error);
+          return false;
+        }
+      }
       
       
       function todoSet(){
         fetchTodoData().then((data) => {
-          setTodoData(data);
+          setTodoData(data.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)));
         }).catch((error) => {
           console.log("Error fetching data:", error);
         });
       }
     
-      const updateIsCompleted = (todoId) => {
-        setTodoData((prevTodos) =>
-          prevTodos.map((item) =>
-            item.todoId === todoId ? { ...item, isCompleted: !item.isCompleted } : item
-          )
-        );
+      const updateIsCompleted = async(todo) => {
+        // setTodoData((prevTodos) =>
+        //   prevTodos.map((item) =>
+        //     item.todoId === todoId ? { ...item, isCompleted: !item.isCompleted } : item
+        //   )
+        // );
+
+        const payload = {
+          isCompleted : !todo.isCompleted
+        }
+
+       const updateResponse = await updateTodoData(todo.todoId,payload)
+
+        console.log(todo);
+        console.log(updateResponse,'updateResponse');
+        if(updateResponse){
+          todoSet();
+        }
       };
 
     const deleteTodo = async(todo) => {
@@ -118,7 +141,7 @@
                     type="checkbox"
                     id={`check-${data.todoId}`}
                     checked={data.isCompleted}
-                    onChange={() => updateIsCompleted(data.todoId)}
+                    onChange={() => updateIsCompleted(data)}
                   />
                   <label htmlFor={`check-${data.todoId}`}>
                   <span></span>
