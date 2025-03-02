@@ -1,37 +1,68 @@
     import { useState,useEffect } from 'react';
     import { FaTrash } from 'react-icons/fa';
+    import { getTodoResponse,deleteTodoResponse } from '../service';
     
-    const initialTodoData = [
-      {
-        todoId: 1,
-        todoText: "Buy groceries",
-        isCompleted: false,
-        createdAt: "2023-07-15T12:00:00Z"
-      },
-      {
-        todoId: 2,
-        todoText: "Read a book",
-        isCompleted: false,
-        createdAt: "2023-07-15T12:15:00Z"
-      },
-      {
-        todoId: 3,
-        todoText: "Finish project",
-        isCompleted: true,
-        createdAt: "2023-07-15T12:30:00Z"
-      },
-    ];
+    // const initialTodoData = [
+    //   {
+    //     todoId: 1,
+    //     todoText: "Buy groceries",
+    //     isCompleted: false,
+    //     createdAt: "2023-07-15T12:00:00Z"
+    //   },
+    //   {
+    //     todoId: 2,
+    //     todoText: "Read a book",
+    //     isCompleted: false,
+    //     createdAt: "2023-07-15T12:15:00Z"
+    //   },
+    //   {
+    //     todoId: 3,
+    //     todoText: "Finish project",
+    //     isCompleted: true,
+    //     createdAt: "2023-07-15T12:30:00Z"
+    //   },
+    // ];
     
     export default function Details({addTodo}) {
-      const [todoData, setTodoData] = useState(initialTodoData);
+      const [todoData, setTodoData] = useState([]);
       const [filterValue, setfilterValue] = useState('All');
 
-      useEffect(()=>{
-        if(addTodo){
-            console.log(addTodo);
-            
+      useEffect(() => {
+        console.log('tododata changed'); 
+        todoSet();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, []);
+
+      async function fetchTodoData() {
+        try {
+          const data = await getTodoResponse()
+          console.log("Fetched Data:", data);
+          return data.data;
+        } catch (error) {
+          console.log("Error fetching data:", error);
+          return [];
         }
-      },[addTodo])
+      }
+
+      async function deleteTodoData(id) {
+        try {
+          const data = await deleteTodoResponse(id)
+          console.log("delete Data:", data);
+          return data.data;
+        } catch (error) {
+          console.log("Error delete data:", error);
+          return false;
+        }
+      }
+      
+      
+      function todoSet(){
+        fetchTodoData().then((data) => {
+          setTodoData(data);
+        }).catch((error) => {
+          console.log("Error fetching data:", error);
+        });
+      }
     
       const updateIsCompleted = (todoId) => {
         setTodoData((prevTodos) =>
@@ -41,10 +72,16 @@
         );
       };
 
-    const deleteTodo = (todo) => {
-        setTodoData((prevTodos) =>
-            prevTodos.filter((item) =>item.todoId !== todo.todoId)
-          );
+    const deleteTodo = async(todo) => {
+        // setTodoData((prevTodos) =>
+        //     prevTodos.filter((item) =>item.todoId !== todo.todoId)
+        //   );
+        console.log(todo.todoId);
+        const deleteResponse = await deleteTodoData(todo.todoId)
+        console.log(deleteResponse,'deleteresponse');
+        if(deleteResponse){
+          todoSet();
+        }
     }
 
     const filterTodo = (event) => {
